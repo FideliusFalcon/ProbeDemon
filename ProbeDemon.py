@@ -93,7 +93,7 @@ def Arguments():
     parser.add_argument("-i","--iface", metavar="",help="Parse the desired network interface you want to sniff on")
     parser.add_argument("-t","--table", metavar="",help="Parse the name of the table you want the script to save data to")
     parser.add_argument("--server", metavar="",help="If you wan't the script to upload the database to a TFTP server input with IP address/domain")
-    parser.add_argument("--port", metavar="",type=int,help="If you TFPT server use another port than 69 call this option and input port")
+    parser.add_argument("--port", metavar="",type=int,help="If you uses a TFPT server with a different port than 69 call this option and input port")
     
     args = parser.parse_args()
     
