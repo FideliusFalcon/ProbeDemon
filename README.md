@@ -20,6 +20,7 @@ $pip install sqlite3 tftpy argparse scapy
 
 ## Arguments
 Argument | Description
+------------ | -------------
 **--sniff, -s** | This will start the sniffing and for now logging
 **--iface, i** | Use this to parse the name of the NIC
 **--server** - If you want to put the database in a TFTP server, you should define this with server IP/domain
