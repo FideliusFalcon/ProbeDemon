@@ -22,7 +22,7 @@ $pip install sqlite3 tftpy argparse scapy
 **Argument** | **Description**
 ------------ | ---------------
 **--sniff, -s** | This will start the sniffing and for now logging
-**--iface, i** | Use this to parse the name of the NIC
+**--iface, -i** | Use this to parse the name of the NIC
 **--server** | If you want to put the database in a TFTP server, you should define this with server IP/domain
 **--port** | If your TFTP server use a different port than 69, please define in this option
 
