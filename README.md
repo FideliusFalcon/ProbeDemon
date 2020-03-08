@@ -7,7 +7,6 @@ ProbeDemon is using the scapy libary to capture probe requests send out by phone
 $python ProbeDemon.py --sniff -i wlan0mon -t table101  
 **Sniffing, logging and TFTP put:**  
 $python ProbeDemon.py --sniff -i wlan0mon -t tftptable101 --server 192.168.1.12   
-Test
 
 ## Requirements
 You will need a WiFi network interface card that can be forced into monitormode. The easiest way is to use airmon-ng, but you can also do it with iwconfig:  
