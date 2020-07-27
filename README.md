@@ -15,14 +15,15 @@ $sudo iw dev [NIC NAME] set type monitor
 $sudo ip link set [NIC NAME] up  
 
 ## Library dependencies
-You will need to install some python libaries for this to work:  
-$pip install sqlite3 tftpy argparse scapy
+You will need to install some python libaries:
+$sudo pip install -r requirements.txt
 
 ## Arguments
 **Argument** | **Description**
 ------------ | ---------------
 **--sniff, -s** | This will start the sniffing and for now logging
 **--iface, -i** | Use this to parse the name of the NIC
+**--table, -t** | Datebase table name (it will append if already exits)
 **--server** | If you want to put the database in a TFTP server, you should define this with server IP/domain
 **--port** | If your TFTP server use a different port than 69, please define in this option
 
