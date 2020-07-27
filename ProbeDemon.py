@@ -6,8 +6,13 @@ import time
 import argparse
 import tftpy
 
+from MacLookup import maclookup
+
 class ProbeSniffer():
     def __init__(self, TableName, iface, TFTPip, TFTPport):
+        self.mac = maclookup()
+        #self.mac.UpdateVendorList()
+
         self.LOGLIST = {}
         self.TableName = TableName
         self.TFTPip = TFTPip
@@ -40,8 +45,9 @@ class ProbeSniffer():
                         SSID = pkt.info.decode('utf-8')
                     except:
                         SSID = str(pkt.info)
-                    print("MAC: " + MAC + " with SSID: " + SSID)
-                    self.InsertIntoTable(MAC, SSID)
+                    VENDOR = self.mac.lookup(MAC)
+                    print("MAC: " + MAC + "(" + VENDOR + ")" + " with SSID: " + SSID)
+                    self.InsertIntoTable(MAC, SSID, VENDOR)
                  
     
     
@@ -51,7 +57,7 @@ class ProbeSniffer():
     
     def CreateTable(self):
         try:
-            command = "CREATE TABLE " + self.TableName + " (MAC, SSID, TIMESTAMP)"
+            command = "CREATE TABLE " + self.TableName + " (MAC, SSID, VENDOR, FIRST_SEEN, LAST_SEEN, COUNTER INT)"
             self.cur.execute(command)
             self.conn.commit()  
         except Exception as e:
@@ -62,27 +68,39 @@ class ProbeSniffer():
         self.cur.execute(command)
         for row in self.cur:
             if row[0] in self.LOGLIST.keys():
-                self.LOGLIST[row[0]][row[1]] = row[2]
+                self.LOGLIST[row[0]][row[1]] = {"vendor":row[2],"first_seen":row[3],"last_seen":row[4],"counter":row[5]}
             else:
-                self.LOGLIST[row[0]] = {row[1]:row[2]}
+                self.LOGLIST[row[0]] = {row[1]:{"vendor":row[2],"first_seen":row[3],"last_seen":row[4],"counter":row[5]}}
     
-    def InsertIntoTable(self, MAC, SSID):
-        TIMESTAMP = int(time.time())
+    def InsertIntoTable(self, MAC, SSID, VENDOR):
+        FIRST_SEEN = int(time.time())
+        # Check if MAC is already logget
         if MAC in self.LOGLIST.keys():
+            # Check if the logget MAC already has made a probe for the same SSID and updating counter/last_seen
             if SSID in self.LOGLIST[MAC].keys():
+                LAST_SEEN = time.time()
+                COUNTER = self.LOGLIST[MAC][SSID]["counter"] + 1
+                self.LOGLIST[MAC][SSID]["counter"] = COUNTER
+                self.LOGLIST[MAC][SSID]["last_seen"] = LAST_SEEN
+
+                command = "UPDATE " + self.TableName + " SET LAST_SEEN = ?,COUNTER = ? WHERE MAC = ? AND SSID = ?"
+                self.cur.execute(command, (LAST_SEEN, COUNTER, MAC, SSID))
                 return
+
+            # Adds the new SSID to the MAC's dictionary in the logging list
             elif SSID not in self.LOGLIST[MAC].keys():
-                self.LOGLIST[MAC][SSID] = TIMESTAMP
-                command = "INSERT INTO " + self.TableName + " (MAC, SSID, TIMESTAMP) VALUES (?,?,?)"
-                self.cur.execute(command, (MAC, SSID, TIMESTAMP))
+                self.LOGLIST[MAC][SSID] = {"vendor":VENDOR,"first_seen":FIRST_SEEN,"last_seen":FIRST_SEEN,"counter":0}
+                command = "INSERT INTO " + self.TableName + " (MAC, SSID, VENDOR, FIRST_SEEN, COUNTER) VALUES (?,?,?,?,?)"
+                self.cur.execute(command, (MAC, SSID, VENDOR, FIRST_SEEN, 0))
                 self.conn.commit()
                 if self.TFTPip != None:
                     UploadToTFTP(self.TFTPip, self.TFTPport)
-                
+
+        # Creating a new MAC dictionary in the logging list
         elif MAC not in self.LOGLIST.keys():
-            self.LOGLIST[MAC] = {SSID:TIMESTAMP}         
-            command = "INSERT INTO " + self.TableName + " (MAC, SSID, TIMESTAMP) VALUES (?,?,?)"
-            self.cur.execute(command, (MAC, SSID, TIMESTAMP))
+            self.LOGLIST[MAC] = {SSID: {"vendor": VENDOR, "first_seen": FIRST_SEEN, "last_seen": FIRST_SEEN, "counter": 0}}
+            command = "INSERT INTO " + self.TableName + " (MAC, SSID, VENDOR, FIRST_SEEN, COUNTER) VALUES (?,?,?,?,?)"
+            self.cur.execute(command, (MAC, SSID, VENDOR, FIRST_SEEN, 0))
             self.conn.commit()
             if self.TFTPip != None:
                 UploadToTFTP(self.TFTPip, self.TFTPport)
@@ -112,7 +130,13 @@ def UploadToTFTP(ip, port):
         print("Failed to upload to TFTP server")
     
 if __name__ == "__main__":
-    StartSniff,iface, TableName,TFTPip,TFTPport = Arguments()
+    #StartSniff,iface, TableName,TFTPip,TFTPport = Arguments()
+    StartSniff = True
+    TableName = "test"
+    iface = "wlp0s20f0u1mon"
+    TFTPip = None
+    TFTPport = None
+
     if StartSniff == True:
         ProbeSniffer = ProbeSniffer(TableName, iface, TFTPip, TFTPport)
         ProbeSniffer.StartDatabase()
