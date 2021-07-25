@@ -10,13 +10,17 @@ $python ProbeDemon.py --sniff -i wlan0mon -t tftptable101 --server 192.168.1.12
 
 ## Requirements
 You will need a WiFi network interface card that can be forced into monitormode. The easiest way is to use airmon-ng, but you can also do it with iwconfig:  
-$sudo ip link set [NIC NAME] down  
-$sudo iw dev [NIC NAME] set type monitor  
-$sudo ip link set [NIC NAME] up  
+```bash
+sudo ip link set [NIC NAME] down  
+sudo iw dev [NIC NAME] set type monitor  
+sudo ip link set [NIC NAME] up  
+```
 
 ## Library dependencies
 You will need to install some python libaries:
-$sudo pip install -r requirements.txt
+```bash
+sudo pip install -r requirements.txt
+```
 
 ## Arguments
 **Argument** | **Description**
