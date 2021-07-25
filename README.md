@@ -4,7 +4,12 @@ ProbeDemon is using the scapy libary to capture probe requests send out by phone
 
 As a new feature the script will also try to indicate which vendor the device MAC address belongs to. 
 
-### Exambles
+ProbeDemon is 100% passive and will not interact with devices or access-points. 
+
+## What is a probe?
+A probe is sent by WiFi devices asking for networks it has been connected to in the past. As an observer you can use this to collect information about a specific person/device or devices around you. Some devices uses a random generated MAC address before connection, so you can't always trust the probe package. They tend to regenerate this MAC address for every probe request, so it's really easy to detect when they're doing it. 
+
+## Exambles
 **Sniffing and logging:**  
 ```
 python ProbeDemon.py --sniff -i wlan0mon -t table101  
